@@ -103,7 +103,7 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
         {messages.length === 0 && (
           <div className="text-gray-400 text-sm">
             {!activePdf
-              ? 'Please select a file'
+              ? 'Please select a document to use the AI assistant'
               : 'Chat / analysis results will appear here'}
           </div>
         )}
@@ -132,8 +132,9 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
         <button
           type="button"
           onClick={toggleListening} // your toggle function
-          className={`p-2 rounded-lg border transition-colors duration-200
+          className={`p-2 rounded-lg border transition-colors duration-200 ${!activePdf ? 'cursor-not-allowed' : ''}
       ${listening ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+          disabled={!activePdf}
         >
           {listening ? '🛑' : '🎤'}
         </button>
@@ -143,7 +144,7 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask something about the resume..."
+          placeholder="Ask something about the document..."
           disabled={!activePdf}
           className={`flex-1 border rounded-lg px-3 py-2
       ${!activePdf ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-black'}`}

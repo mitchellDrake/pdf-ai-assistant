@@ -148,7 +148,7 @@ export default function DocumentViewer({
   if (!file) {
     return (
       <div className="bg-white p-4 rounded-lg shadow h-[80vh] flex items-center justify-center text-gray-400">
-        Upload a PDF to preview it
+        Upload or select a PDF to view it
       </div>
     );
   }

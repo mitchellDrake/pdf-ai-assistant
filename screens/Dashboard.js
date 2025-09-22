@@ -23,11 +23,13 @@ export default function Dashboard() {
   const apiFetch = useApi();
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !token) {
       console.log('no user found');
       router.push('/');
+    } else {
+      loadPDFs(); // fetch PDFs on component mount
     }
-  }, [user]);
+  }, []);
 
   const [pdfFiles, setPdfFiles] = useState([]); // original File objects
   const [activeIndex, setActiveIndex] = useState(null); // index of the active PDF
@@ -95,6 +97,7 @@ export default function Dashboard() {
       console.error('Failed to fetch PDF chunks', error);
     }
   };
+
   const handleConfirmDelete = async () => {
     try {
       showLoading(`Deleting ${pdfToDelete.fileName}...`);
@@ -110,9 +113,7 @@ export default function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    loadPDFs(); // fetch PDFs on component mount
-  }, []);
+  useEffect(() => {}, []);
 
   if (!user) {
     return null;

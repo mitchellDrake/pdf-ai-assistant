@@ -8,7 +8,7 @@ export function useSpeechRecognition(handleInputChange, lang = 'en-US') {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Speech Recognition API not supported in this browser.');
+      console.warn('Speech Recognition API is not supported in this browser.');
       return;
     }
 
