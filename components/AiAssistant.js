@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { useApi } from '../utils/api';
 import { useSpeechRecognition } from '../utils/useSpeechRecognition';
+import { Volume, VolumeX } from 'lucide-react';
 
 export default function AiAssistant({ onNavigateToPage, activePdf }) {
   const [input, setInput] = useState('');
@@ -25,7 +26,7 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   });
 
   const apiFetch = useApi();
-  const { listening, toggleListening, speakText } = useSpeechRecognition(
+  const { listening, toggleListening } = useSpeechRecognition(
     (transcript, type) => {
       // add a space to the previous text just to ensure we are spacing between sentences
       setInput((prev) => prev + ' ' + transcript);
@@ -116,8 +117,7 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
 
   // parse the correct page and sentence from the LLM response
   const handleNewMessage = (llmResponseText) => {
-    // Example LLM response: "Traderlink is a data platform ... (Page 2, Sentence 2)"
-    speakText(llmResponseText);
+    // text to speech if on
     const match = llmResponseText.match(/\(Page (\d+), Sentence (\d+)\)/);
     if (match) {
       const page = parseInt(match[1], 10);
@@ -134,8 +134,6 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   return (
     <div className="bg-white p-4 rounded-lg shadow space-y-4 h-[80vh] flex flex-col">
       <h2 className="font-semibold text-lg">AI Assistant</h2>
-
-      {/* Chat messages */}
       <div
         ref={chatContainerRef}
         className="bg-gray-100 p-4 rounded-lg text-gray-500 flex-1 overflow-auto flex flex-col space-y-2"
@@ -164,7 +162,6 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
           </div>
         ))}
       </div>
-
       <form onSubmit={handleSend} className="mt-2 flex gap-2 items-center">
         <button
           type="button"
