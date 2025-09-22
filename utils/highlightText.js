@@ -108,8 +108,10 @@ module.exports = {
           matchedItems = pdfPageText.items.slice(minIndex, maxIndex + 1) || [];
         }
       }
-
+      console.log('matched items', matchedItems);
       const coordinates = [];
+
+      if (matchedItems.length === 0) return coordinates;
       for (block of matchedItems) {
         const [a, b, c, d, e, f] = block.transform;
 
