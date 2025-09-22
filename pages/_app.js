@@ -1,6 +1,7 @@
 import '../styles/globals.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import { Analytics } from '@vercel/analytics/next';
 import { AuthProvider } from '../context/AuthContext';
 import { LoadingProvider } from '../context/LoadingContext';
 import LoadingScreen from '../components/LoadingScreen';
@@ -40,6 +41,7 @@ export default function MyApp({ Component, pageProps }) {
         <LoadingScreen />
         <DesktopOnly>
           <Component {...pageProps} />
+          <Analytics />
         </DesktopOnly>
       </LoadingProvider>
     </AuthProvider>
