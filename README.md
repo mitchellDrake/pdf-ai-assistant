@@ -3,7 +3,7 @@
 A modern Next.js application that lets users upload pdfs and interact with them using AI.  
 Built with TypeScript, TailwindCSS, and powered by the PDF AI Server backend.
 
----
+## demo link: https://pdf-ai-assistant-ten.vercel.app/
 
 ## 🚀 Features
 
