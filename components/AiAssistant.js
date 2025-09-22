@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { useApi } from '../utils/api';
 import { useSpeechRecognition } from '../utils/useSpeechRecognition';
-import { Volume, VolumeX } from 'lucide-react';
 
 export default function AiAssistant({ onNavigateToPage, activePdf }) {
   const [input, setInput] = useState('');
