@@ -113,7 +113,7 @@ module.exports = {
 
       if (matchedItems.length === 0) return coordinates;
 
-      for (block of matchedItems) {
+      for (let block of matchedItems) {
         console.log('matchedItems len');
         if (!block.transform) {
           console.log('no transform in block', block);
