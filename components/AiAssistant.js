@@ -22,10 +22,12 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   });
 
   const apiFetch = useApi();
-  const { listening, toggleListening } = useSpeechRecognition((e) =>
-    setInput(e.target.value)
+  const { listening, toggleListening } = useSpeechRecognition(
+    (transcript, type) => {
+      // add a space to the previous text just to ensure we are spacing between sentences
+      setInput((prev) => prev + ' ' + transcript);
+    }
   );
-
   // initialize or load chat
   useEffect(() => {
     async function loadChat() {
@@ -46,6 +48,16 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
     loadChat();
   }, [activePdf]);
 
+  // make sure refs are initialized
+  useEffect(() => {
+    chunksRef.current = chunks;
+  }, [chunks]);
+
+  useEffect(() => {
+    chatIdRef.current = chatId;
+  }, [chatId]);
+
+  // before sending chat to Vercel AI, create the embeddings based on your question to send them as context to LLM
   const handleSend = async (e) => {
     e.preventDefault();
     const freezeInput = input;
@@ -73,12 +85,7 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
     );
   };
 
-  useEffect(() => {
-    chunksRef.current = chunks;
-  }, [chunks]);
-  useEffect(() => {
-    chatIdRef.current = chatId;
-  }, [chatId]);
+  // parse the correct page and sentence from the LLM response
   const handleNewMessage = (llmResponseText) => {
     // Example LLM response: "Traderlink is a data platform ... (Page 2, Sentence 2)"
     const match = llmResponseText.match(/\(Page (\d+), Sentence (\d+)\)/);
@@ -118,7 +125,6 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
             } max-w-[75%]`}
           >
             {message.parts?.map((part, i) => {
-              // console.log(part);
               if (part.type === 'text') return <div key={i}>{part.text}</div>;
               return null;
             })}
@@ -126,12 +132,10 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
         ))}
       </div>
 
-      {/* Input area */}
       <form onSubmit={handleSend} className="mt-2 flex gap-2 items-center">
-        {/* Microphone button */}
         <button
           type="button"
-          onClick={toggleListening} // your toggle function
+          onClick={toggleListening}
           className={`p-2 rounded-lg border transition-colors duration-200 ${!activePdf ? 'cursor-not-allowed' : ''}
       ${listening ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
           disabled={!activePdf}
@@ -139,7 +143,6 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
           {listening ? '🛑' : '🎤'}
         </button>
 
-        {/* Text input */}
         <input
           type="text"
           value={input}
@@ -147,10 +150,8 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
           placeholder="Ask something about the document..."
           disabled={!activePdf}
           className={`flex-1 border rounded-lg px-3 py-2
-      ${!activePdf ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-black'}`}
+    ${!activePdf ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-black'}`}
         />
-
-        {/* Send button */}
         <button
           type="submit"
           disabled={!activePdf}

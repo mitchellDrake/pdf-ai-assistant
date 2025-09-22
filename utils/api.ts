@@ -43,7 +43,9 @@ export function useApi() {
         const errBody = await res.json();
         if (errBody.error) message = errBody.error;
       } catch {}
-      throw new Error(message);
+
+      console.error(message);
+      return { error: message }; // or some fallback value
     }
 
     return res.json();

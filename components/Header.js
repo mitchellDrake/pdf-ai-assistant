@@ -10,7 +10,6 @@ export default function Header({ onUpload }) {
     <header className="flex items-center justify-between p-6 bg-white shadow">
       <h1 className="text-xl font-bold">Resume AI Tool</h1>
       <div className="flex gap-2">
-        {/* Upload button */}
         <label className="relative flex items-center border rounded-lg px-3 py-2 cursor-pointer bg-blue-600 text-white hover:bg-blue-700 transition">
           <Upload className="w-4 h-4 mr-2" /> Upload PDF
           <input
@@ -21,7 +20,6 @@ export default function Header({ onUpload }) {
           />
         </label>
 
-        {/* Logout button */}
         <button
           className="px-3 py-2 border rounded-lg text-gray-600 hover:bg-gray-100"
           onClick={() => logout()}

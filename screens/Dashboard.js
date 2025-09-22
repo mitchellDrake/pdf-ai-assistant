@@ -42,7 +42,7 @@ export default function Dashboard() {
   async function loadPDFs() {
     try {
       showLoading('Loading PDFs...');
-      const { pdfs } = await apiFetch('/pdf/list');
+      const { pdfs = [] } = await apiFetch('/pdf/list');
       setPdfFiles(pdfs);
       hideLoading();
     } catch (err) {

@@ -15,16 +15,17 @@ export default function DocumentViewer({
   const canvasRefs = useRef([]);
   const containerRef = useRef(null);
 
-  // Dynamic import
+  // Dynamic import because using the module seems to cause errors
   useEffect(() => {
     const loadPdfjs = async () => {
       const pdfjsLib = await import('pdfjs-dist/build/pdf.mjs');
-      await import('pdfjs-dist/build/pdf.worker.mjs'); // worker
+      await import('pdfjs-dist/build/pdf.worker.mjs');
       setPdfLib(pdfjsLib);
     };
     loadPdfjs();
   }, []);
 
+  // take in the target chunk and match the text to the pdf and return coordinates
   useEffect(() => {
     if (
       !pdfLib ||
@@ -155,7 +156,6 @@ export default function DocumentViewer({
 
   return (
     <div className="bg-white p-4 rounded-lg shadow h-[80vh] flex flex-col">
-      {/* Fixed header with pagination */}
       <div className="flex items-center justify-between mb-2 shrink-0">
         <h2 className="font-semibold text-lg">Document Viewer</h2>
         <div className="flex items-center space-x-2">
@@ -191,7 +191,6 @@ export default function DocumentViewer({
         </div>
       </div>
 
-      {/* Scrollable PDF content */}
       <div
         className="flex-1 overflow-auto pr-2"
         ref={containerRef}
@@ -203,13 +202,11 @@ export default function DocumentViewer({
               key={`page_${index + 1}`}
               className="page-container relative mb-4 flex justify-center"
             >
-              {/* The rendered PDF page */}
               <canvas
                 ref={(el) => (canvasRefs.current[index] = el)}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
 
-              {/* Highlight overlay */}
               <div
                 className="absolute top-0 left-0 pointer-events-none"
                 style={{
