@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { useApi } from '../utils/api';
+import { useSpeechRecognition } from '../utils/useSpeechRecognition';
 
 export default function AiAssistant({ onNavigateToPage, activePdf }) {
   const [input, setInput] = useState('');
@@ -21,6 +22,9 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   });
 
   const apiFetch = useApi();
+  const { listening, toggleListening } = useSpeechRecognition((e) =>
+    setInput(e.target.value)
+  );
 
   // initialize or load chat
   useEffect(() => {
@@ -44,10 +48,12 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    const freezeInput = input;
+    setInput('');
+    if (!freezeInput.trim()) return;
     const response = await apiFetch('/embeddings/search', {
       method: 'POST',
-      body: { question: input, pdfId: activePdf.id },
+      body: { question: freezeInput, pdfId: activePdf.id },
     });
 
     const chunks = response.chunks || [];
@@ -57,7 +63,7 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
       .join('\n');
 
     await sendMessage(
-      { text: input },
+      { text: freezeInput },
       {
         body: {
           context: context,
@@ -65,8 +71,6 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
         },
       }
     );
-
-    setInput('');
   };
 
   useEffect(() => {
@@ -123,25 +127,38 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
       </div>
 
       {/* Input area */}
-      <form onSubmit={handleSend} className="mt-2 flex gap-2">
+      <form onSubmit={handleSend} className="mt-2 flex gap-2 items-center">
+        {/* Microphone button */}
+        <button
+          type="button"
+          onClick={toggleListening} // your toggle function
+          className={`p-2 rounded-lg border transition-colors duration-200
+      ${listening ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+        >
+          {listening ? '🛑' : '🎤'}
+        </button>
+
+        {/* Text input */}
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask something about the resume..."
           disabled={!activePdf}
-          className={`flex-1 border rounded-lg px-3 py-2 
-          ${!activePdf ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-black'}`}
+          className={`flex-1 border rounded-lg px-3 py-2
+      ${!activePdf ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-black'}`}
         />
+
+        {/* Send button */}
         <button
           type="submit"
           disabled={!activePdf}
-          className={`px-4 py-2 rounded-lg 
-    ${
-      !activePdf
-        ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-        : 'bg-blue-600 text-white hover:bg-blue-700'
-    }`}
+          className={`px-4 py-2 rounded-lg
+      ${
+        !activePdf
+          ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+          : 'bg-blue-600 text-white hover:bg-blue-700'
+      }`}
         >
           Send
         </button>
