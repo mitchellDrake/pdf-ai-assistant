@@ -113,6 +113,7 @@ module.exports = {
 
       if (matchedItems.length === 0) return coordinates;
       for (block of matchedItems) {
+        console.log('block', block);
         const [a, b, c, d, e, f] = block.transform;
 
         const x0 = e;
