@@ -25,7 +25,7 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   });
 
   const apiFetch = useApi();
-  const { listening, toggleListening } = useSpeechRecognition(
+  const { listening, toggleListening, speakText } = useSpeechRecognition(
     (transcript, type) => {
       // add a space to the previous text just to ensure we are spacing between sentences
       setInput((prev) => prev + ' ' + transcript);
@@ -117,6 +117,7 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   // parse the correct page and sentence from the LLM response
   const handleNewMessage = (llmResponseText) => {
     // Example LLM response: "Traderlink is a data platform ... (Page 2, Sentence 2)"
+    speakText(llmResponseText);
     const match = llmResponseText.match(/\(Page (\d+), Sentence (\d+)\)/);
     if (match) {
       const page = parseInt(match[1], 10);

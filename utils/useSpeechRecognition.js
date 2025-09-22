@@ -54,5 +54,26 @@ export function useSpeechRecognition(callback, lang = 'en-US') {
     }
   };
 
-  return { listening, toggleListening };
+  const speakText = (text) => {
+    if (!window.speechSynthesis) {
+      console.warn('Speech Synthesis API not supported');
+      return;
+    }
+    const voices = window.speechSynthesis.getVoices();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const selectedVoice =
+      voices.find((v) => v.lang === 'en-US' && v.name.includes('Shelley')) ||
+      voices[0];
+
+    console.log(voices);
+    console.log(selectedVoice);
+    // Optional: customize voice, pitch, rate, volume
+    utterance.voice = selectedVoice;
+    // utterance.pitch = 1;
+    // utterance.rate = 1;
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  return { listening, toggleListening, speakText };
 }
