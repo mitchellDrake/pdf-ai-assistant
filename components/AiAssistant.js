@@ -7,12 +7,15 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   const [input, setInput] = useState('');
   const [chunks, setChunks] = useState([]);
   const [chatId, setChatId] = useState(null);
-
+  const [thinking, setThinking] = useState(false);
   const chatIdRef = useRef(null);
   const chunksRef = useRef([]);
+  const chatContainerRef = useRef(null);
 
   const { messages, setMessages, sendMessage, handleSubmit } = useChat({
+    onUpdate: {},
     onFinish: ({ message, messages, isAbort, isDisconnect, isError }) => {
+      setThinking(false);
       handleNewMessage(message.parts[1].text);
       apiFetch('/chat', {
         method: 'POST',
@@ -57,12 +60,36 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
     chatIdRef.current = chatId;
   }, [chatId]);
 
+  // scroll to bottom when new message logs
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [messages]);
+
   // before sending chat to Vercel AI, create the embeddings based on your question to send them as context to LLM
   const handleSend = async (e) => {
     e.preventDefault();
     const freezeInput = input;
-    setInput('');
     if (!freezeInput.trim()) return;
+    setInput('');
+
+    // Optimistic UI update
+    const tempId = `temp-${Date.now()}`;
+    setThinking(true);
+    //set user message placeholder immediately
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: tempId, // temporary unique ID
+        role: 'user',
+        parts: [{ type: 'text', text: freezeInput }],
+      },
+    ]);
+
     const response = await apiFetch('/embeddings/search', {
       method: 'POST',
       body: { question: freezeInput, pdfId: activePdf.id },
@@ -74,6 +101,8 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
       .map((c) => `Page ${c.page} Sentence ${c.sentenceIndex}: ${c.text}`)
       .join('\n');
 
+    //remove user placeholder
+    setMessages((prev) => prev.filter((m) => m.id !== tempId));
     await sendMessage(
       { text: freezeInput },
       {
@@ -106,7 +135,10 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
       <h2 className="font-semibold text-lg">AI Assistant</h2>
 
       {/* Chat messages */}
-      <div className="bg-gray-100 p-4 rounded-lg text-gray-500 flex-1 overflow-auto flex flex-col space-y-2">
+      <div
+        ref={chatContainerRef}
+        className="bg-gray-100 p-4 rounded-lg text-gray-500 flex-1 overflow-auto flex flex-col space-y-2"
+      >
         {messages.length === 0 && (
           <div className="text-gray-400 text-sm">
             {!activePdf
@@ -136,9 +168,9 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
         <button
           type="button"
           onClick={toggleListening}
-          className={`p-2 rounded-lg border transition-colors duration-200 ${!activePdf ? 'cursor-not-allowed' : ''}
+          className={`p-2 rounded-lg border transition-colors duration-200 ${!activePdf || thinking ? 'cursor-not-allowed' : ''}
       ${listening ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-          disabled={!activePdf}
+          disabled={!activePdf || thinking}
         >
           {listening ? '🛑' : '🎤'}
         </button>
@@ -147,17 +179,19 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask something about the document..."
-          disabled={!activePdf}
+          placeholder={
+            thinking ? 'Thinking....' : 'Ask something about the document...'
+          }
+          disabled={!activePdf || thinking}
           className={`flex-1 border rounded-lg px-3 py-2
-    ${!activePdf ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-black'}`}
+    ${!activePdf || thinking ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-black'}`}
         />
         <button
           type="submit"
-          disabled={!activePdf}
+          disabled={!activePdf || thinking}
           className={`px-4 py-2 rounded-lg
       ${
-        !activePdf
+        !activePdf || thinking
           ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
           : 'bg-blue-600 text-white hover:bg-blue-700'
       }`}
