@@ -1,4 +1,4 @@
-# PDF AI Assistant Server
+# PDF AI Assistant
 
 Overview:
 A web app that allows users to upload PDFs and interact with them via AI-powered chat. The app extracts text from PDFs, generates embeddings, and uses vector search to provide context-aware answers. Page locations of relevant content are highlighted in the PDF viewer.
