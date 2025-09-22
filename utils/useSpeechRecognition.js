@@ -3,10 +3,12 @@ import { useState, useRef, useEffect } from 'react';
 export function useSpeechRecognition(callback, lang = 'en-US') {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
+  const SpeechRecognitionRef = useRef(null);
 
   useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
+    SpeechRecognitionRef.current = SpeechRecognition;
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
@@ -37,6 +39,10 @@ export function useSpeechRecognition(callback, lang = 'en-US') {
   }, [callback, lang]);
 
   const toggleListening = () => {
+    if (!SpeechRecognitionRef.current) {
+      alert('Your system doesn’t support speech recognition.');
+      return;
+    }
     if (!recognitionRef.current) return;
 
     if (listening) {

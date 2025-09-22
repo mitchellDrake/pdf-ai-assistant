@@ -112,8 +112,13 @@ module.exports = {
       const coordinates = [];
 
       if (matchedItems.length === 0) return coordinates;
+
       for (block of matchedItems) {
-        console.log('block', block);
+        console.log('matchedItems len');
+        if (!block.transform) {
+          console.log('no transform in block', block);
+        }
+        console.log('block good', block);
         const [a, b, c, d, e, f] = block.transform;
 
         const x0 = e;
@@ -131,9 +136,11 @@ module.exports = {
         };
         coordinates.push(format);
       }
+
       return coordinates;
     } catch (error) {
       console.log(error);
+      return [];
     }
   },
 };
