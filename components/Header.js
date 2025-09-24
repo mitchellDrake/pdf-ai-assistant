@@ -1,4 +1,4 @@
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 

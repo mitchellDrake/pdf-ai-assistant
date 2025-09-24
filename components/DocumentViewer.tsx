@@ -1,21 +1,42 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { matchText } from '../utils/highlightText';
+import type { PDFDocumentProxy, PDFPageProxy } from 'pdfjs-dist';
+
+interface Highlight {
+  page: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface Chunk {
+  text: string;
+}
+
+interface DocumentViewerProps {
+  file?: string | null;
+  targetPage?: number | null;
+  targetSentence?: string;
+  targetChunk?: Chunk[];
+}
 
 export default function DocumentViewer({
-  file = false,
-  targetPage = false,
-  targetSentence = false,
-  targetChunk = false,
-}) {
-  const [pdfLib, setPdfLib] = useState(null);
-  const [pdfDoc, setPdfDoc] = useState(null);
+  file = null,
+  targetPage = null,
+  targetSentence = '',
+  targetChunk = [],
+}: DocumentViewerProps) {
+  const [pdfLib, setPdfLib] = useState<any>(null);
+  const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [highlights, setHighlights] = useState([]);
-  const canvasRefs = useRef([]);
-  const containerRef = useRef(null);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
 
-  // Dynamic import because using the module seems to cause errors
+  const canvasRefs = useRef<HTMLCanvasElement[]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  // Load pdfjs dynamically
   useEffect(() => {
     const loadPdfjs = async () => {
       const pdfjsLib = await import('pdfjs-dist/build/pdf.mjs');
@@ -25,15 +46,14 @@ export default function DocumentViewer({
     loadPdfjs();
   }, []);
 
-  // take in the target chunk and match the text to the pdf and return coordinates
+  // Highlight target text
   useEffect(() => {
     if (
       !pdfLib ||
       !pdfDoc ||
       !targetPage ||
       !targetSentence ||
-      !targetChunk ||
-      targetChunk.length === 0
+      !targetChunk?.length
     )
       return;
 
@@ -41,15 +61,14 @@ export default function DocumentViewer({
       const pageNum = Math.min(Math.max(1, targetPage), pdfDoc.numPages);
       const page = await pdfDoc.getPage(pageNum);
 
-      // Scroll to the page
       goToPage(pageNum);
 
-      // Get text items for the page
       const textContent = await page.getTextContent();
-      const containerWidth = containerRef.current.offsetWidth;
+      const containerWidth = containerRef.current?.offsetWidth ?? 1;
       const unscaledViewport = page.getViewport({ scale: 1 });
       const scale = containerWidth / unscaledViewport.width;
       const viewport = page.getViewport({ scale });
+
       const newHighlights = matchText(
         targetChunk[0].text,
         textContent,
@@ -68,40 +87,52 @@ export default function DocumentViewer({
     if (!pdfLib || !file || !containerRef.current) return;
 
     const loadPdf = async () => {
-      const pdf = await pdfLib.getDocument(file).promise;
+      const pdf: PDFDocumentProxy = await pdfLib.getDocument(file).promise;
       setPdfDoc(pdf);
       setCurrentPage(1);
       setHighlights([]);
-      containerRef.current.scrollTo({ top: 0, behavior: 'auto' });
-      const containerWidth = containerRef.current.offsetWidth;
+      containerRef.current?.scrollTo({ top: 0, behavior: 'auto' });
+
+      const containerWidth = containerRef.current?.offsetWidth ?? 1;
 
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         const page = await pdf.getPage(pageNum);
 
         const unscaledViewport = page.getViewport({ scale: 1 });
-        const scale = containerWidth / unscaledViewport.width;
+        const scale = containerRef.current
+          ? containerRef.current.offsetWidth / unscaledViewport.width
+          : 1;
         const viewport = page.getViewport({ scale });
-        let canvas;
+
+        let canvas: HTMLCanvasElement | undefined;
         while (!(canvas = canvasRefs.current[pageNum - 1])) {
           await new Promise((res) => requestAnimationFrame(res));
         }
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
 
-        await page.render({ canvasContext: context, viewport }).promise;
+        const context = canvas.getContext('2d');
+        if (!context) continue;
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        await page.render({
+          canvas,
+          canvasContext: context,
+          viewport,
+        }).promise;
       }
     };
 
     loadPdf();
   }, [pdfLib, file]);
 
-  // Scroll listener to update current page
+  // Update current page on scroll
   useEffect(() => {
-    if (!containerRef.current || !pdfDoc) return;
+    const container = containerRef.current;
+    if (!container || !pdfDoc) return;
 
     const handleScroll = () => {
-      const containerRect = containerRef.current.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
       let closestPage = 1;
       let minDistance = Infinity;
 
@@ -111,7 +142,6 @@ export default function DocumentViewer({
         const canvasCenter = rect.top + rect.height / 2;
         const containerCenter = containerRect.top + containerRect.height / 2;
         const distance = Math.abs(canvasCenter - containerCenter);
-
         if (distance < minDistance) {
           minDistance = distance;
           closestPage = index + 1;
@@ -121,28 +151,21 @@ export default function DocumentViewer({
       setCurrentPage(closestPage);
     };
 
-    const container = containerRef.current;
     container.addEventListener('scroll', handleScroll);
-
     return () => container.removeEventListener('scroll', handleScroll);
   }, [pdfDoc]);
 
-  const goToPage = (pageNum) => {
+  const goToPage = (pageNum: number) => {
     const canvas = canvasRefs.current[pageNum - 1];
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    // Get the canvas top relative to container
     const containerRect = container.getBoundingClientRect();
     const canvasRect = canvas.getBoundingClientRect();
     const scrollTop =
       container.scrollTop + (canvasRect.top - containerRect.top);
 
-    container.scrollTo({
-      top: scrollTop,
-      behavior: 'smooth',
-    });
-
+    container.scrollTo({ top: scrollTop, behavior: 'smooth' });
     setCurrentPage(pageNum);
   };
 
@@ -163,18 +186,18 @@ export default function DocumentViewer({
             <input
               type="number"
               min={1}
-              max={pdfDoc?.numPages || 1}
+              max={pdfDoc?.numPages ?? 1}
               value={currentPage}
               onChange={(e) => {
                 const pageNum = Math.min(
                   Math.max(1, parseInt(e.target.value) || 1),
-                  pdfDoc.numPages
+                  pdfDoc?.numPages ?? 1
                 );
                 goToPage(pageNum);
               }}
               className="w-12 text-center border rounded"
             />{' '}
-            / {pdfDoc?.numPages || 1}
+            / {pdfDoc?.numPages ?? 1}
           </span>
           <button
             onClick={() => goToPage(Math.max(1, currentPage - 1))}
@@ -183,7 +206,9 @@ export default function DocumentViewer({
             Prev
           </button>
           <button
-            onClick={() => goToPage(Math.min(pdfDoc.numPages, currentPage + 1))}
+            onClick={() =>
+              goToPage(Math.min(pdfDoc?.numPages ?? 1, currentPage + 1))
+            }
             className="bg-blue-600 text-white px-4 py-2 rounded-lg"
           >
             Next
@@ -203,15 +228,16 @@ export default function DocumentViewer({
               className="page-container relative mb-4 flex justify-center"
             >
               <canvas
-                ref={(el) => (canvasRefs.current[index] = el)}
+                ref={(el) => {
+                  if (el) canvasRefs.current[index] = el;
+                }}
                 style={{ maxWidth: '100%', height: 'auto' }}
               />
-
               <div
                 className="absolute top-0 left-0 pointer-events-none"
                 style={{
-                  width: canvasRefs.current[index]?.width || 0,
-                  height: canvasRefs.current[index]?.height || 0,
+                  width: canvasRefs.current[index]?.width ?? 0,
+                  height: canvasRefs.current[index]?.height ?? 0,
                 }}
               >
                 {highlights

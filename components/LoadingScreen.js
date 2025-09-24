@@ -1,3 +1,4 @@
+'use client';
 import { useLoading } from '../context/LoadingContext';
 
 export default function LoadingScreen() {

@@ -133,8 +133,6 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
         sentence,
         filteredChunks: [{ text: llmResponseText }],
       });
-    } else {
-      console.log('no match found', llmResponseText);
     }
   };
 
