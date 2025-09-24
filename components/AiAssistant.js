@@ -6,11 +6,9 @@ import { useAuth } from '../context/AuthContext';
 
 export default function AiAssistant({ onNavigateToPage, activePdf }) {
   const [input, setInput] = useState('');
-  const [chunks, setChunks] = useState([]);
   const [chatId, setChatId] = useState(null);
   const [thinking, setThinking] = useState(false);
   const chatIdRef = useRef(null);
-  const chunksRef = useRef([]);
   const chatContainerRef = useRef(null);
 
   const { messages, setMessages, sendMessage, handleSubmit } = useChat({
@@ -58,11 +56,6 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
     loadChat();
   }, [activePdf]);
 
-  // make sure refs are initialized
-  useEffect(() => {
-    chunksRef.current = chunks;
-  }, [chunks]);
-
   useEffect(() => {
     chatIdRef.current = chatId;
   }, [chatId]);
@@ -96,17 +89,6 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
         parts: [{ type: 'text', text: freezeInput }],
       },
     ]);
-
-    // const response = await apiFetch('/embeddings/search', {
-    //   method: 'POST',
-    //   body: { question: freezeInput, pdfId: activePdf.id },
-    // });
-
-    // const chunks = response.chunks || [];
-    // setChunks(chunks);
-    // const context = chunks
-    //   .map((c) => `Page ${c.page} Sentence ${c.sentenceIndex}: ${c.text}`)
-    //   .join('\n');
 
     //remove user placeholder
     setMessages((prev) => prev.filter((m) => m.id !== tempId));
