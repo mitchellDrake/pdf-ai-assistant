@@ -51,7 +51,21 @@ export function useApi() {
     return res.json();
   }
 
-  return apiFetch;
+  function listenToStatus(pdfId: string, onUpdate: (s: string) => void) {
+    // Token in query string for SSE
+    const url = `${API_URL}/pdf/status/${pdfId}`;
+    const es = new EventSource(url);
+
+    es.onmessage = (e) => {
+      const { status } = JSON.parse(e.data);
+      onUpdate(status);
+    };
+
+    es.onerror = () => es.close();
+    return () => es.close();
+  }
+
+  return { apiFetch, listenToStatus };
 }
 
 export async function signup(email: string, password: string) {

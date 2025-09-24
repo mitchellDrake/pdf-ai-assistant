@@ -10,13 +10,13 @@ module.exports = {
   ) {
     try {
       const normalize = (str) => str.replace(/\s+/g, ' ').trim();
-
       let targetTextNormalized = normalize(textToFind);
-      const pdfStrings = pdfPageText.items.map((item) => item.str);
-      const pdfFullTextNormalized = normalize(pdfStrings.join(' '));
-      const startCharIndex =
-        pdfFullTextNormalized.indexOf(targetTextNormalized);
-      if (startCharIndex === -1) return [];
+      // const pdfStrings = pdfPageText.items.map((item) => item.str);
+      // const pdfFullTextNormalized = normalize(pdfStrings.join(' '));
+      // const startCharIndex =
+      //   pdfFullTextNormalized.indexOf(targetTextNormalized);
+      // console.log('startCharIndex', startCharIndex);
+      // if (startCharIndex === -1) return [];
 
       let matchedItems = [];
 
@@ -92,14 +92,16 @@ module.exports = {
           text: item.str.trim(),
           original: item,
         }));
+
         // 2. Configure Fuse.js
         const fuse = new Fuse(pdfItems, {
           keys: ['text'],
           includeScore: true,
-          threshold: 0.2, // lower = stricter match
-          distance: 30, // max distance for approximate matches
+          threshold: 0.4, // lower = stricter match
+          distance: 40, // max distance for approximate matches
           ignoreLocation: true,
         });
+
         const result = fuse.search(targetTextNormalized);
         if (result.length !== 0) {
           const refIndices = result.map((r) => r.refIndex);

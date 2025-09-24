@@ -29,6 +29,7 @@ export default function Login() {
       // Save token to localStorage or context
       localStorage.setItem('token', data.token);
       console.log('Logged in user:', data.user);
+      setError('Account created. Please log in to continue.');
     }
   };
 

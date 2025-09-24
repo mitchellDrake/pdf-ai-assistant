@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useChat } from '@ai-sdk/react';
 import { useApi } from '../utils/api';
 import { useSpeechRecognition } from '../utils/useSpeechRecognition';
+import { useAuth } from '../context/AuthContext';
 
 export default function AiAssistant({ onNavigateToPage, activePdf }) {
   const [input, setInput] = useState('');
@@ -16,7 +17,11 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
     onUpdate: {},
     onFinish: ({ message, messages, isAbort, isDisconnect, isError }) => {
       setThinking(false);
-      handleNewMessage(message.parts[1].text);
+      let newMessage;
+      newMessage =
+        message.parts[message.parts.length - 1]?.text ||
+        message.parts[message.parts.length - 1]?.output;
+      handleNewMessage(newMessage);
       apiFetch('/chat', {
         method: 'POST',
         body: { chatId: chatIdRef.current, messages: messages },
@@ -24,7 +29,9 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
     },
   });
 
-  const apiFetch = useApi();
+  const { apiFetch } = useApi();
+  const { token } = useAuth();
+
   const { listening, toggleListening } = useSpeechRecognition(
     (transcript, type) => {
       // add a space to the previous text just to ensure we are spacing between sentences
@@ -90,16 +97,16 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
       },
     ]);
 
-    const response = await apiFetch('/embeddings/search', {
-      method: 'POST',
-      body: { question: freezeInput, pdfId: activePdf.id },
-    });
+    // const response = await apiFetch('/embeddings/search', {
+    //   method: 'POST',
+    //   body: { question: freezeInput, pdfId: activePdf.id },
+    // });
 
-    const chunks = response.chunks || [];
-    setChunks(chunks);
-    const context = chunks
-      .map((c) => `Page ${c.page} Sentence ${c.sentenceIndex}: ${c.text}`)
-      .join('\n');
+    // const chunks = response.chunks || [];
+    // setChunks(chunks);
+    // const context = chunks
+    //   .map((c) => `Page ${c.page} Sentence ${c.sentenceIndex}: ${c.text}`)
+    //   .join('\n');
 
     //remove user placeholder
     setMessages((prev) => prev.filter((m) => m.id !== tempId));
@@ -107,8 +114,8 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
       { text: freezeInput },
       {
         body: {
-          context: context,
           pdfId: activePdf.id,
+          token: token,
         },
       }
     );
@@ -121,12 +128,13 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
     if (match) {
       const page = parseInt(match[1], 10);
       const sentence = parseInt(match[2], 10);
-
-      const filteredChunks = chunksRef.current.filter(
-        (v) => v.page === page && v.sentenceIndex === sentence
-      );
-      // Call Dashboard callback
-      onNavigateToPage({ page, sentence, filteredChunks });
+      onNavigateToPage({
+        page,
+        sentence,
+        filteredChunks: [{ text: llmResponseText }],
+      });
+    } else {
+      console.log('no match found', llmResponseText);
     }
   };
 
@@ -154,10 +162,17 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
                 : 'self-start bg-gray-300 text-gray-900 rounded-lg p-2'
             } max-w-[75%]`}
           >
-            {message.parts?.map((part, i) => {
-              if (part.type === 'text') return <div key={i}>{part.text}</div>;
-              return null;
-            })}
+            {message.parts[message.parts.length - 1]?.text ? (
+              <div key={message.id}>
+                {message.parts[message.parts.length - 1]?.text}
+              </div>
+            ) : message.parts[message.parts.length - 1]?.output &&
+              typeof message.parts[message.parts.length - 1]?.output ===
+                'string' ? (
+              <div key={message.id}>
+                {message.parts[message.parts.length - 1]?.output}
+              </div>
+            ) : null}
           </div>
         ))}
       </div>

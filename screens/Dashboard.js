@@ -20,7 +20,7 @@ export default function Dashboard() {
   const { user, token } = useAuth();
   const { showLoading, hideLoading } = useLoading();
   const router = useRouter();
-  const apiFetch = useApi();
+  const { apiFetch, listenToStatus } = useApi();
 
   useEffect(() => {
     if (!user || !token) {
@@ -57,7 +57,7 @@ export default function Dashboard() {
 
     const formData = new FormData();
     formData.append('file', file);
-    showLoading('Processing file, this could take a few seconds...');
+    showLoading(`Uploading ${file.name}...`);
     try {
       const data = await apiFetch(
         '/pdf/upload',
@@ -66,11 +66,18 @@ export default function Dashboard() {
           body: formData,
         },
         true
-      ); // `true` for FormData so Content-Type isn't overridden
+      );
+
+      const success = listenToStatus(data.pdf.id, (status) => {
+        showLoading(`${status}`);
+        if (status === 'done' || status === 'failed') {
+          loadPDFs();
+          success();
+        }
+      });
 
       console.log('Upload response:', data);
-      loadPDFs();
-      hideLoading();
+      // loadPDFs();
     } catch (err) {
       hideLoading();
       console.error('Upload failed:', err);
@@ -89,7 +96,6 @@ export default function Dashboard() {
     setTargetSentence('');
     const selectedPdf = pdfFiles[index];
     if (!selectedPdf) return;
-    let pdfString = `/pdf/i/${selectedPdf.id}`;
 
     try {
       const data = await apiFetch(`/pdf/i/${selectedPdf.id}`);
@@ -102,7 +108,6 @@ export default function Dashboard() {
     try {
       showLoading(`Deleting ${pdfToDelete.fileName}...`);
       setActiveIndex(null);
-      console.log('pdfToDelete', pdfToDelete);
       await apiFetch(`/pdf/i/${pdfToDelete.id}`, {
         method: 'DELETE',
       });
