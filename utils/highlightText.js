@@ -17,6 +17,51 @@ module.exports = {
       //   pdfFullTextNormalized.indexOf(targetTextNormalized);
       // console.log('startCharIndex', startCharIndex);
       // if (startCharIndex === -1) return [];
+      // console.log(pdfPageText);
+      // let allLetters = [];
+
+      // for (const block of pdfPageText.items) {
+      //   const { str, transform, width, height } = block;
+      //   const [a, b, c, d, e, f] = transform;
+
+      //   const avgCharWidth = width / str.length;
+
+      //   for (let i = 0; i < str.length; i++) {
+      //     // Compute letter-level coordinates using your math
+      //     const x0 = e + i * avgCharWidth; // starting x plus offset for letter
+      //     const y0 = f;
+
+      //     const letterFormat = {
+      //       page: pageNum,
+      //       canvasHeight: viewport.height,
+      //       canvasWidth: viewport.width,
+      //       char: str[i],
+      //       x: x0 * scale,
+      //       y: viewport.height - y0 * scale - height * scale, // flip y-axis
+      //       width: avgCharWidth * scale,
+      //       height: height * scale,
+      //     };
+
+      //     allLetters.push(letterFormat);
+      //   }
+      // }
+
+      // console.log('all letters', allLetters, allLetters.length);
+
+      // const filteredLetters = allLetters.filter((item) => {
+      //   // Keep only letters, numbers, and common symbols
+      //   return /^[\w\d!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]$/.test(item.char);
+      // });
+      // console.log('filteredLetters', filteredLetters, filteredLetters.length);
+      // const pdfText = filteredLetters.map((item) => item.char).join('');
+      // console.log('pdfText', pdfText);
+      // const cleanedSearchString = textToFind.replace(
+      //   /[^a-zA-Z0-9!"#$%&'()*+,\-./:;<=>?@[\\\]^_`{|}~]/g,
+      //   ''
+      // );
+      // console.log('cleaned search string', cleanedSearchString);
+      // const searchIndexStart = cleanedSearchString.indexOf(cleanedSearchString);
+      // console.log('search start', searchIndexStart);
 
       let matchedItems = [];
 
