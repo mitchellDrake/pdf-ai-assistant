@@ -10,8 +10,8 @@ import type { Metadata } from 'next';
 
 // SEO metadata (replaces Head in _document.tsx/_app.tsx)
 export const metadata: Metadata = {
-  title: 'My App',
-  description: 'App description',
+  title: 'PDF AI Assistant',
+  description: 'Read and Annotate PDFs with AI',
 };
 
 export default function RootLayout({
