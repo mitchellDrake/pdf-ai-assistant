@@ -8,7 +8,6 @@ import {
 
 // tool imports
 import createSearchTool from '../../../utils/ai/tools/createSearchTool';
-// import { summarizeContext } from '../../../utils/ai/tools/summarizeContext';
 import { composeAnswer } from '../../../utils/ai/tools/composeAnswer';
 
 // Allow streaming responses up to 30 seconds
