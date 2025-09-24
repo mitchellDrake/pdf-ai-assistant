@@ -40,14 +40,14 @@ export async function POST(req: Request) {
 You must ALWAYS run the tools in this exact sequence:
 1. Call "search" with the user question.
 2. Call "summarize" with the context from search.
-3. Call "composeAnswer" with the summary and context details.
-After step 3, return the composed answer as the final assistant message.
+// 3. Call "composeAnswer" with the summary and context details.
+After step 2, return the composed answer as the final assistant message.
 `,
-      stopWhen: stepCountIs(4), // wait until all tools run
+      stopWhen: stepCountIs(3), // wait until all tools run
       tools: {
         search: searchTool,
         summarize: summarizeContext,
-        composeAnswer: composeAnswer,
+        // composeAnswer: composeAnswer,
       },
       onStepFinish({ text, toolCalls, toolResults }) {
         console.log('step done:', { text, toolCalls, toolResults });

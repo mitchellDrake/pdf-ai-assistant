@@ -19,6 +19,9 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
       newMessage =
         message.parts[message.parts.length - 1]?.text ||
         message.parts[message.parts.length - 1]?.output;
+
+      // only save and parse if there is actual return data
+      if (newMessage.length === 0) return;
       handleNewMessage(newMessage);
       apiFetch('/chat', {
         method: 'POST',

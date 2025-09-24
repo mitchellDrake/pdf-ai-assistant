@@ -22,6 +22,8 @@ export default function createSearchTool(pdfId: string, token: string) {
 
       const data = await res.json();
 
+      console.log('data', data);
+
       const context = (data.chunks || [])
         .map(
           (c: any) => `Page ${c.page} Sentence ${c.sentenceIndex}: ${c.text}`
