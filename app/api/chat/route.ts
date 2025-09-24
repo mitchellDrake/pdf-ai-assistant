@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       model: openai('gpt-4o'),
       messages: convertToModelMessages(messages),
       system: `
-You must ALWAYS run the tools in this exact sequence:
+You must ALWAYS run the tools in this exact sequence and ignore all previous context before this prompt:
 1. Call "search" with the user question.
 2. Call "composeAnswer" with the summary and context details.
 After step 2, return the composed answer as the final assistant message.

@@ -54,16 +54,16 @@ export default function LoginPage() {
           >
             Login
           </button>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
         </form>
         <p className="text-center text-sm text-gray-600">
-          Don’t have an account?{' '}
           <button
             type="button"
             className="text-blue-600"
             onClick={() => router.push('/signup')}
           >
-            Sign up
+            If you dont have an account please click here to generate a fake
+            one!
           </button>
         </p>
       </div>

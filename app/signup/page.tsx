@@ -29,9 +29,11 @@ export default function SignupPage() {
       // Save token (if your flow requires it)
       localStorage.setItem('token', data.token);
       console.log('Created user:', data.user);
-      setError('✅ Account created. Please log in to continue.');
+      setError('✅ Account created. Redirecting you to login.....');
       // Optionally auto-redirect:
-      // router.push("/");
+      setTimeout(() => {
+        router.push('/');
+      }, 1000);
     }
   };
 
@@ -59,7 +61,7 @@ export default function SignupPage() {
           >
             Sign Up
           </button>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-sm text-center">{error}</p>}
         </form>
         <p className="text-center text-sm text-gray-600">
           Already have an account?{' '}
