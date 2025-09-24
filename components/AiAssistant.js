@@ -11,42 +11,41 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   const chatIdRef = useRef(null);
   const chatContainerRef = useRef(null);
 
-  const { messages, setMessages, sendMessage, handleSubmit, addToolResult } =
-    useChat({
-      onData: (data) => {
-        // console.log('data received', data);
-      },
-      onToolCall: (event) => {
-        // event = { toolName: string, args: object, message: UIMessage }
-        // console.log('Tool called:', event);
-        // console.log('tool things', {
-        //   tool: event.toolCall.toolName,
-        //   toolCallId: event.toolCall.toolCallId,
-        //   output: event.toolCall.input,
-        // });
-        // addToolResult({
-        //   tool: event.toolCall.toolName,
-        //   toolCallId: event.toolCall.toolCallId,
-        //   output: event.toolCall.input,
-        // });
-      },
-      onFinish: ({ message, messages, isAbort, isDisconnect, isError }) => {
-        setThinking(false);
-        // console.log('message finish', message);
-        let newMessage;
-        newMessage =
-          message.parts[message.parts.length - 1]?.text ||
-          message.parts[message.parts.length - 1]?.output;
+  const { messages, setMessages, sendMessage, completion } = useChat({
+    onData: (data) => {
+      // console.log('data received', data);
+    },
+    onToolCall: (event) => {
+      // event = { toolName: string, args: object, message: UIMessage }
+      // console.log('Tool called:', event);
+      // console.log('tool things', {
+      //   tool: event.toolCall.toolName,
+      //   toolCallId: event.toolCall.toolCallId,
+      //   output: event.toolCall.input,
+      // });
+      // addToolResult({
+      //   tool: event.toolCall.toolName,
+      //   toolCallId: event.toolCall.toolCallId,
+      //   output: event.toolCall.input,
+      // });
+    },
+    onFinish: ({ message, messages, isAbort, isDisconnect, isError }) => {
+      setThinking(false);
+      // console.log('message finish', message);
+      let newMessage;
+      newMessage =
+        message.parts[message.parts.length - 1]?.text ||
+        message.parts[message.parts.length - 1]?.output;
 
-        // only save and parse if there is actual return data
-        if (newMessage.length === 0) return;
-        handleNewMessage(newMessage);
-        apiFetch('/chat', {
-          method: 'POST',
-          body: { chatId: chatIdRef.current, messages: messages },
-        });
-      },
-    });
+      // only save and parse if there is actual return data
+      if (newMessage.length === 0) return;
+      handleNewMessage(newMessage);
+      apiFetch('/chat', {
+        method: 'POST',
+        body: { chatId: chatIdRef.current, messages: messages },
+      });
+    },
+  });
 
   const { apiFetch } = useApi();
   const { token } = useAuth();
@@ -78,12 +77,14 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   }, [activePdf]);
 
   useEffect(() => {
+    console.log('completion', completion);
+  }, [completion]);
+  useEffect(() => {
     chatIdRef.current = chatId;
   }, [chatId]);
 
   // scroll to bottom when new message logs
   useEffect(() => {
-    console.log('message update', messages[messages.length - 1]);
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTo({
         top: chatContainerRef.current.scrollHeight,

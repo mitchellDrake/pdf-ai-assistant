@@ -1,10 +1,13 @@
 'use client';
 const API_URL = process.env.NEXT_PUBLIC_EXTERNAL_API_URL;
 
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Toaster, toast } from 'sonner';
 
 export function useApi() {
   const { token } = useAuth();
+  const [lastToastMessage, setLastToastMessage] = useState('');
 
   async function apiFetch(
     endpoint: string,
@@ -58,6 +61,13 @@ export function useApi() {
 
     es.onmessage = (e) => {
       const { status } = JSON.parse(e.data);
+      setLastToastMessage(status);
+      if (status === 'done') {
+        toast.success('PDF upload complete!');
+      } else if (status !== lastToastMessage) {
+        toast.message(status);
+      }
+
       onUpdate(status);
     };
 

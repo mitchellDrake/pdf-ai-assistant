@@ -55,6 +55,9 @@ export default function DashboardPage() {
       showLoading('Loading PDFs...');
       const { pdfs = [] } = await apiFetch('/pdf/list');
       setPdfFiles(pdfs);
+      setActiveIndex((prev) =>
+        prev ? prev + 1 : pdfFiles.length === 0 ? 0 : 1
+      );
       hideLoading();
     } catch (err) {
       hideLoading();
@@ -75,15 +78,14 @@ export default function DashboardPage() {
         { method: 'POST', body: formData },
         true
       );
+      hideLoading();
       const success = listenToStatus(data.pdf.id, (status) => {
-        showLoading(`${status}`);
         if (status === 'done' || status === 'failed') {
           loadPDFs();
           success();
         }
       });
     } catch (err) {
-      hideLoading();
       console.error('Upload failed:', err);
     }
   };

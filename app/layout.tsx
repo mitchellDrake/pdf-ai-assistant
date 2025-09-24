@@ -7,6 +7,7 @@ import { LoadingProvider } from '../context/LoadingContext';
 import LoadingScreen from '../components/LoadingScreen';
 import DesktopOnly from '../components/DesktopOnly'; // we'll move this out
 import type { Metadata } from 'next';
+import { Toaster } from 'sonner';
 
 // SEO metadata (replaces Head in _document.tsx/_app.tsx)
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
           <LoadingProvider>
             <LoadingScreen />
             <DesktopOnly>
+              <Toaster richColors closeButton position="bottom-right" />
               {children}
               <Analytics />
             </DesktopOnly>
