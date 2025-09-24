@@ -14,25 +14,25 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   const { messages, setMessages, sendMessage, handleSubmit, addToolResult } =
     useChat({
       onData: (data) => {
-        console.log('data received', data);
+        // console.log('data received', data);
       },
       onToolCall: (event) => {
         // event = { toolName: string, args: object, message: UIMessage }
-        console.log('Tool called:', event);
-        console.log('tool things', {
-          tool: event.toolCall.toolName,
-          toolCallId: event.toolCall.toolCallId,
-          output: event.toolCall.input,
-        });
-        addToolResult({
-          tool: event.toolCall.toolName,
-          toolCallId: event.toolCall.toolCallId,
-          output: event.toolCall.input,
-        });
+        // console.log('Tool called:', event);
+        // console.log('tool things', {
+        //   tool: event.toolCall.toolName,
+        //   toolCallId: event.toolCall.toolCallId,
+        //   output: event.toolCall.input,
+        // });
+        // addToolResult({
+        //   tool: event.toolCall.toolName,
+        //   toolCallId: event.toolCall.toolCallId,
+        //   output: event.toolCall.input,
+        // });
       },
       onFinish: ({ message, messages, isAbort, isDisconnect, isError }) => {
         setThinking(false);
-        console.log('message finish', message);
+        // console.log('message finish', message);
         let newMessage;
         newMessage =
           message.parts[message.parts.length - 1]?.text ||
