@@ -5,39 +5,28 @@ interface PDFFile {
   fileUrl: string;
 }
 
-interface PDFChunk {
-  text: string;
-  // add any other fields you use in targetChunk
-}
+// interface PDFChunk {
+//   text: string;
+// }
 
-interface DocumentViewerProps {
-  file: string | null;
-  targetPage: number | null;
-  targetSentence: string;
-  targetChunk: PDFChunk[]; // or any[] if you don’t have a type
-}
+// interface DocumentViewerProps {
+//   file: string | null;
+//   targetPage: number | null;
+//   targetSentence: string;
+//   targetChunk: PDFChunk[];
+// }
 
-import { ComponentType, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLoading } from '../../context/LoadingContext';
-import { useRouter } from 'next/navigation'; // ✅ App Router
+import { useRouter } from 'next/navigation';
 import { useApi } from '../../utils/api';
-
-import dynamic from 'next/dynamic';
 
 import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import ConfirmModal from '../../components/ConfirmModal';
 import AiAssistant from '../../components/AiAssistant';
 import DocumentViewer from '../../components/DocumentViewer';
-
-// const DocumentViewer = dynamic<React.FC<DocumentViewerProps>>(
-//   async () => {
-//     const mod = await import('../../components/DocumentViewer');
-//     return mod.default as React.FC<DocumentViewerProps>;
-//   },
-//   { ssr: false }
-// );
 
 export default function DashboardPage() {
   const { user, token } = useAuth();

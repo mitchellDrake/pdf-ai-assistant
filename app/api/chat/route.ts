@@ -8,7 +8,7 @@ import {
 
 // tool imports
 import createSearchTool from '../../../utils/ai/tools/createSearchTool';
-import { summarizeContext } from '../../../utils/ai/tools/summarizeContent';
+// import { summarizeContext } from '../../../utils/ai/tools/summarizeContext';
 import { composeAnswer } from '../../../utils/ai/tools/composeAnswer';
 
 // Allow streaming responses up to 30 seconds
@@ -39,15 +39,14 @@ export async function POST(req: Request) {
       system: `
 You must ALWAYS run the tools in this exact sequence:
 1. Call "search" with the user question.
-2. Call "summarize" with the context from search.
-// 3. Call "composeAnswer" with the summary and context details.
+2. Call "composeAnswer" with the summary and context details.
 After step 2, return the composed answer as the final assistant message.
 `,
       stopWhen: stepCountIs(3), // wait until all tools run
       tools: {
         search: searchTool,
-        summarize: summarizeContext,
-        // composeAnswer: composeAnswer,
+        // summarize: summarizeContext,
+        composeAnswer: composeAnswer,
       },
       onStepFinish({ text, toolCalls, toolResults }) {
         console.log('step done:', { text, toolCalls, toolResults });

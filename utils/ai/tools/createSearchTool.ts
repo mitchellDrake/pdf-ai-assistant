@@ -4,7 +4,8 @@ const API_URL = process.env.NEXT_PUBLIC_EXTERNAL_API_URL;
 
 export default function createSearchTool(pdfId: string, token: string) {
   return tool({
-    description: 'Get the pdf context based on the users input',
+    description:
+      'Get the pdf context based on the users input. Always return context as the response data from await fetch',
     inputSchema: z.object({
       question: z.string().describe('The user’s input question'),
     }),
@@ -29,6 +30,12 @@ export default function createSearchTool(pdfId: string, token: string) {
           (c: any) => `Page ${c.page} Sentence ${c.sentenceIndex}: ${c.text}`
         )
         .join('\n');
+
+      console.log('search response', {
+        question,
+        pdfId,
+        context,
+      });
 
       return {
         question,
