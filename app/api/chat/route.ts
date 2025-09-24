@@ -142,7 +142,7 @@ export async function POST(req: Request) {
     const result = streamText({
       model: openai('gpt-4o'),
       messages: convertToModelMessages([updatedMessage]),
-      system: `Search messege for the most relevent context related to the users question and then return a summary with the page and sentence number`,
+      system: `Search messege for the most relevent context related to the users question and then return a summary with the page and sentence number. Only include the most relevant page reference for your response and ensure you only put it at the very end of the summary in the format: (Page x, Sentence y).`,
       stopWhen: stepCountIs(2),
       tools: {
         search: tool({
@@ -160,10 +160,10 @@ export async function POST(req: Request) {
           },
         }),
         summarize: tool({
-          description: `Return summary and the page and sentence number with (Page x, Sentence y) appended to the end of the summary`,
+          description: `Return summary and the page and sentence number with (Page x, Sentence y) appended to the end of the summary. Only include the most relevant page reference for your response and ensure you only put it at the very end of the summary.`,
           inputSchema: z.object({
             summary: z.string(
-              'Summary of the most relevent context item with (Page x, Sentence y) appended to the end of the summary'
+              'Summary of the most relevent context item with (Page x, Sentence y) appended to the end of the summary. Only include the most relevant page reference for your response and ensure you only put it at the very end of the summary.'
             ),
           }),
           execute: async ({ summary }) => {
