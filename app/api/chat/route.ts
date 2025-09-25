@@ -1,3 +1,8 @@
+type MyUIMessage = {
+  type: 'text';
+  text: string;
+};
+
 import { openai } from '@ai-sdk/openai';
 import {
   streamText,
@@ -48,7 +53,7 @@ After step 2, return the composed answer as the final assistant message.
         composeAnswer: composeAnswer,
       },
       onStepFinish({ text, toolCalls, toolResults }) {
-        console.log('step done:', { text, toolCalls, toolResults });
+        // console.log('step done:', { text, toolCalls, toolResults });
       },
     });
 

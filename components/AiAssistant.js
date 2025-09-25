@@ -115,7 +115,7 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
 
     //remove user placeholder
     setMessages((prev) => prev.filter((m) => m.id !== tempId));
-    await sendMessage(
+    sendMessage(
       { text: freezeInput },
       {
         body: {
@@ -198,8 +198,8 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
             thinking ? 'Thinking....' : 'Ask something about the document...'
           }
           disabled={!activePdf || thinking}
-          className={`flex-1 border rounded-lg px-3 py-2
-    ${!activePdf || thinking ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-black'}`}
+          className={`flex-1 border rounded-lg px-3 py-2 rainbow-border chat-text-input
+    ${!activePdf || thinking ? 'bg-gray-200 text-gray-400 cursor-not-allowed rainbow-inset' : 'bg-white text-black'}`}
         />
         <button
           type="submit"

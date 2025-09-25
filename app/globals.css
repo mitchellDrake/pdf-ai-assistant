@@ -10,6 +10,42 @@
     transform: rotate(360deg);
   }
 }
+@keyframes rainbowGlow {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+.chat-text-input {
+  border-radius: 20px !important;
+}
+
+.rainbow-border:focus {
+  position: relative;
+  border-radius: 20px;
+  /* border: 1px solid #ccc; normal border */
+  box-shadow: 0 0 10px 0px red;
+  /* 0 0 4px 1px orange,
+    0 0 4px 1px yellow,
+    0 0 4px 1px green,
+    0 0 4px 1px blue,
+    0 0 4px 1px indigo,
+    0 0 4px 1px violet; */
+  animation: rainbowGlow 5s linear infinite; /* slower, smoother rotation */
+  outline: none;
+}
+
+.rainbow-inset {
+  position: relative;
+  border-radius: 20px;
+  /* border: 1px solid #ccc; normal border */
+  box-shadow: 0 0 10px 0px red;
+  animation: rainbowGlow 5s linear infinite; /* slower, smoother rotation */
+  outline: none;
+}
 
 .upload-label .upload-input {
   position: absolute;

@@ -31,11 +31,11 @@ export default function createSearchTool(pdfId: string, token: string) {
         )
         .join('\n');
 
-      console.log('search response', {
-        question,
-        pdfId,
-        context,
-      });
+      // console.log('search response', {
+      //   question,
+      //   pdfId,
+      //   context,
+      // });
 
       return {
         question,
