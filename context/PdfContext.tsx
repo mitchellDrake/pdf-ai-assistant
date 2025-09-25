@@ -63,9 +63,7 @@ export function PdfProvider({
       showLoading('Loading PDFs...');
       const { pdfs = [] } = await apiFetch('/pdf/list');
       setPdfFiles(pdfs);
-      setActiveIndex((prev) =>
-        prev ? prev + 1 : pdfs.length === 0 ? null : 1
-      );
+      setActiveIndex(null);
       hideLoading();
       return true;
     } catch (error) {

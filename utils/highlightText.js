@@ -158,34 +158,139 @@ module.exports = {
       const coordinates = [];
 
       if (matchedItems.length === 0) return coordinates;
+      // let counter = 0;
+      // const firstBaseline = matchedItems[0].transform[5];
+      // console.log('matched items', matchedItems);
+      // for (let block of matchedItems) {
+      //   if (!block.transform) {
+      //     continue;
+      //   }
+      //   console.log('block height', block.height);
+      //   const [a, b, c, d, e, f] = block.transform;
+      //   const padding = counter * 0.3;
+      //   const heightMultiple = block.height * 0.2;
+      //   const x0 = e - 5;
+      //   // const y0 = f + heightMultiple;
+      //   const y0 =
+      //     firstBaseline + (block.transform[5] - firstBaseline) - padding; // relative
+      //   const width = block.width;
+      //   const height = block.height;
 
-      for (let block of matchedItems) {
-        if (!block.transform) {
-          continue;
+      //   const format = {
+      //     page: pageNum,
+      //     canvasHeight: viewport.height,
+      //     canvasWidth: viewport.width,
+      //     x: x0 * scale,
+      //     y: viewport.height - y0 * scale - height * scale,
+      //     width: width * scale,
+      //     height: height * scale,
+      //   };
+      //   coordinates.push(format);
+      //   counter++;
+      // }
+
+      // console.log('matched items', matchedItems);
+      function getLineHighlightRects(
+        matchedItems,
+        viewport,
+        pageNum,
+        scale = 1
+      ) {
+        const lineBuckets = new Map();
+        const tolerance = 1; // px tolerance for baseline grouping
+        const coordinates = [];
+
+        // 1. Bucket items into lines by Y
+        for (const block of matchedItems) {
+          const y0 = block.transform[5];
+          let bucketKey = null;
+
+          for (let key of lineBuckets.keys()) {
+            if (Math.abs(key - y0) <= tolerance) {
+              bucketKey = key;
+              break;
+            }
+          }
+
+          if (bucketKey === null) {
+            bucketKey = y0;
+            lineBuckets.set(bucketKey, []);
+          }
+
+          lineBuckets.get(bucketKey).push(block);
         }
-        const [a, b, c, d, e, f] = block.transform;
 
-        const x0 = e;
-        const y0 = f;
-        const width = block.width;
-        const height = block.height;
-        const heightMultiplierConst = height * 0.25 - 10;
-        const heightMultiplier =
-          heightMultiplierConst > 0 ? heightMultiplierConst : 0;
+        // 2. Sort buckets top-to-bottom
+        const sortedBuckets = [...lineBuckets.entries()].sort(
+          (a, b) => b[0] - a[0]
+        );
 
-        const format = {
-          page: pageNum,
-          canvasHeight: viewport.height,
-          canvasWidth: viewport.width,
-          x: x0 * scale,
-          y: viewport.height - y0 * scale - height * scale,
-          width: width * scale,
-          height: height * scale,
-        };
-        coordinates.push(format);
+        let prevSpacing = null;
+        const lineSpacings = [];
+
+        // 3. Compute rect per line bucket
+        sortedBuckets.forEach(([baseline, blocks], idx) => {
+          // If this is a "paragraph break" placeholder, skip
+          if (blocks.every((b) => b.str.trim().length === 0)) return;
+
+          const minX = Math.min(...blocks.map((b) => b.transform[4]));
+          const maxX = Math.max(...blocks.map((b) => b.transform[4] + b.width));
+          const maxHeight = Math.max(...blocks.map((b) => b.height));
+
+          const y0 = baseline;
+
+          let rectHeight;
+
+          // Next bucket’s baseline (if exists)
+          if (idx < sortedBuckets.length - 1) {
+            const [nextBaseline, nextBlocks] = sortedBuckets[idx + 1];
+
+            if (nextBlocks.every((b) => b.str.trim().length === 0)) {
+              // Paragraph/page break
+              rectHeight =
+                prevSpacing ??
+                (lineSpacings.length > 0
+                  ? lineSpacings.reduce((a, b) => a + b, 0) /
+                    lineSpacings.length
+                  : maxHeight);
+            } else {
+              // Normal line spacing
+              rectHeight = y0 - nextBaseline;
+              rectHeight = Math.max(rectHeight, maxHeight); // enforce min height
+              lineSpacings.push(rectHeight);
+              prevSpacing = rectHeight;
+            }
+          } else {
+            // Last line
+            rectHeight =
+              prevSpacing ??
+              (lineSpacings.length > 0
+                ? lineSpacings.reduce((a, b) => a + b, 0) / lineSpacings.length
+                : maxHeight);
+          }
+
+          const rect = {
+            page: pageNum,
+            x: minX * scale - 4,
+            y: viewport.height - y0 * scale - rectHeight * scale,
+            width: (maxX - minX) * scale,
+            height: rectHeight * scale,
+          };
+
+          coordinates.push(rect);
+        });
+
+        return coordinates;
       }
+      const finalCoordinates = getLineHighlightRects(
+        matchedItems,
+        viewport,
+        pageNum,
+        scale
+      );
 
-      return coordinates;
+      // console.log('coordinates', finalCoordinates);
+      return finalCoordinates;
     } catch (error) {
       console.log(error);
       return [];
