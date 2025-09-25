@@ -16,7 +16,7 @@ export default function Header({ onUpload }) {
             type="file"
             accept="application/pdf"
             className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-            onChange={onUpload}
+            onChange={(e) => onUpload(e.target.files?.[0])}
           />
         </label>
 

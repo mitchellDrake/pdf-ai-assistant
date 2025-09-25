@@ -60,7 +60,11 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
   useEffect(() => {
     async function loadChat() {
       try {
-        if (!activePdf) return;
+        if (!activePdf) {
+          setMessages([]); // clear chat when no PDF is selected
+          setChatId(null);
+          return;
+        }
         const response = await apiFetch(`/chat/${activePdf.id}`);
         setChatId(response.chatId);
 
@@ -76,9 +80,6 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
     loadChat();
   }, [activePdf]);
 
-  useEffect(() => {
-    console.log('completion', completion);
-  }, [completion]);
   useEffect(() => {
     chatIdRef.current = chatId;
   }, [chatId]);
@@ -156,28 +157,52 @@ export default function AiAssistant({ onNavigateToPage, activePdf }) {
           </div>
         )}
 
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`${
-              message.role === 'user'
-                ? 'self-end bg-blue-600 text-white rounded-lg p-2'
-                : 'self-start bg-gray-300 text-gray-900 rounded-lg p-2'
-            } max-w-[75%]`}
-          >
-            {message.parts[message.parts.length - 1]?.text ? (
-              <div key={message.id}>
-                {message.parts[message.parts.length - 1]?.text}
-              </div>
-            ) : message.parts[message.parts.length - 1]?.output &&
-              typeof message.parts[message.parts.length - 1]?.output ===
-                'string' ? (
-              <div key={message.id}>
-                {message.parts[message.parts.length - 1]?.output}
-              </div>
-            ) : null}
-          </div>
-        ))}
+        {messages.map((message) => {
+          if (
+            message.parts[message.parts.length - 1].state ===
+              'input-streaming' ||
+            message.parts[message.parts.length - 1].state === 'streaming' ||
+            message.parts[message.parts.length - 1].state ===
+              'input-available' ||
+            message.parts[message.parts.length - 1].state === 'output-available'
+          ) {
+            return null; // skip this one
+          }
+          return (
+            <div
+              key={message.id}
+              className={`${
+                message.role === 'user'
+                  ? 'self-end bg-blue-600 text-white rounded-lg p-2'
+                  : 'self-start bg-gray-300 text-gray-900 rounded-lg p-2'
+              } max-w-[75%]`}
+            >
+              {message.parts[message.parts.length - 1]?.text ? (
+                <div key={message.id}>
+                  {message.parts[message.parts.length - 1]?.text}
+                </div>
+              ) : message.parts[message.parts.length - 1]?.output &&
+                typeof message.parts[message.parts.length - 1]?.output ===
+                  'string' ? (
+                <div key={message.id}>
+                  {message.parts[message.parts.length - 1]?.output}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+
+        {(thinking ||
+          messages[messages.length - 1]?.parts[
+            messages[messages.length - 1]?.parts.length - 1
+          ].text.length === 0) &&
+          messages[messages.length - 1]?.parts[
+            messages[messages.length - 1]?.parts.length - 1
+          ].status !== 'done' && (
+            <div className="self-start bg-gray-300 text-gray-900 rounded-lg p-2 max-w-[75%]">
+              Loading...
+            </div>
+          )}
       </div>
       <form onSubmit={handleSend} className="mt-2 flex gap-2 items-center">
         <button

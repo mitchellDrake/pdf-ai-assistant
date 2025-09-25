@@ -1,8 +1,8 @@
 'use client';
 
-import { useRouter } from 'next/navigation'; // 👈 App Router version
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { loginAPI } from '../utils/api'; // 👈 adjust path if needed
+import { loginAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
 export default function LoginPage() {

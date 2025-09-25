@@ -169,6 +169,10 @@ module.exports = {
         const y0 = f;
         const width = block.width;
         const height = block.height;
+        const heightMultiplierConst = height * 0.25 - 10;
+        const heightMultiplier =
+          heightMultiplierConst > 0 ? heightMultiplierConst : 0;
+
         const format = {
           page: pageNum,
           canvasHeight: viewport.height,
