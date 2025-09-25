@@ -40,12 +40,6 @@ function DashboardContent() {
     }
   }, [user, token, router]);
 
-  // const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-  //   if (!file) return;
-  //   await uploadPdf(file);
-  // };
-
   if (!user) return null; // prevent render before auth check
 
   return (
